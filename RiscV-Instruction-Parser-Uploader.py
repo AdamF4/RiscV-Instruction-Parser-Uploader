@@ -15,13 +15,17 @@
 # Place that file in the same directory as this script.
 
 import time
+import gc
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 
-username = input("Enter your username: ")
-password = input("Enter your password: ")
+# feature will use raw_input if defined (only exists in python 2.7 and has the same functionality as input in python 3.x)
+# allows code to be executed in both python 3.x and 2.7
+try:
+    input = raw_input
+except NameError:
+    pass
 
-vicilogicGameAppURL = "https://www.vicilogic.com/vicilearn/run_step/?s_id=1762"
 # convert_VenusProgramDump_to_vicilogicInstructionMemoryFormat script
 
 f = open("dump.txt")
@@ -71,6 +75,13 @@ instructions = output.split("\n")
 while len(instructions) < 32:
     instructions.append("0000000000000000000000000000000000000000000000000000000000000000")
 
+
+
+vicilogicGameAppURL = "https://www.vicilogic.com/vicilearn/run_step/?s_id=1762"
+
+username = input("Enter your username: ")
+password = input("Enter your password: ")
+
 driver = webdriver.Chrome('chromedriver.exe')  # webdriver must be downloaded and added to same directory as this script
 driver.maximize_window()
 driver.get(vicilogicGameAppURL)                # load the url of the vicilogic step with 256 instructions
@@ -79,6 +90,10 @@ time.sleep(1)  # wait for page to load
 usernameElement = driver.find_element_by_id('email').send_keys(username)        # inout username
 passwordElement = driver.find_element_by_id('password').send_keys(password)     # input password
 loginElement = driver.find_element_by_id('login-btn').click()                   # click login
+
+del password  # delete reference to password
+del username  # delete reference to username
+gc.collect()  # force garbage collection (should remove password and username from memory)
 
 time.sleep(8)  # wait for step to load
 
